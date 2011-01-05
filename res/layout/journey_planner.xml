@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:a="http://schemas.android.com/apk/res/android"
+    a:layout_width="fill_parent" a:layout_height="fill_parent">
+	<LinearLayout a:orientation="vertical"
+		a:id="@+id/layout_main"
+	    a:layout_width="fill_parent" a:layout_height="fill_parent">
+	
+		<Button a:id="@+id/btn_from" a:text="from"
+				a:onClick="onClickFrom"
+				a:layout_width="fill_parent" a:layout_height="wrap_content"/>
+		<Button a:id="@+id/reverse" a:text="reverse"
+				a:onClick="onClickReverse"
+				a:layout_gravity="center_horizontal"
+				a:layout_width="wrap_content" a:layout_height="wrap_content"/>
+		<Button a:id="@+id/btn_to" a:text="to"
+				a:onClick="onClickTo"
+				a:layout_width="fill_parent" a:layout_height="wrap_content"/>
+		<Button a:id="@+id/btn_search" a:text="Search"
+				a:onClick="onClickSearch"
+				a:layout_width="fill_parent" a:layout_height="wrap_content"/>		
+	</LinearLayout>
+	<LinearLayout a:id="@+id/layout_from"
+				  a:orientation="vertical"
+				  a:visibility="gone"
+				  a:layout_width="fill_parent" a:layout_height="fill_parent">
+		<EditText a:id="@+id/text_from"
+				  a:layout_width="fill_parent" a:layout_height="wrap_content"/>
+		<ListView a:id="@+id/list_from"
+				  a:layout_width="fill_parent" a:layout_height="fill_parent"/>
+	</LinearLayout>
+	<LinearLayout a:id="@+id/layout_to"
+				  a:orientation="vertical"
+				  a:visibility="gone"
+				  a:layout_width="fill_parent" a:layout_height="fill_parent">
+		<EditText a:id="@+id/text_to"
+				  a:layout_width="fill_parent" a:layout_height="wrap_content"/>
+		<ListView a:id="@+id/list_to"
+				  a:layout_width="fill_parent" a:layout_height="fill_parent"/>
+	</LinearLayout>
+</FrameLayout>
