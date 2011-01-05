@@ -119,7 +119,7 @@ public class JourneyResult extends Activity {
 				@Override public View getView(int position, View convertView, ViewGroup parent) {
 					try {
 						View row = inflater.inflate(R.layout.result_details_row, null);
-						if(position <= length-1) {
+						if(position <= length-2) {
 							JSONObject leg = legs.get(position);
 							JSONObject mode = leg.getJSONObject("mode");
 							String destination = mode.optString("destination");
@@ -136,7 +136,11 @@ public class JourneyResult extends Activity {
 							//((TextView)row.findViewById(R.id.to)).setText("Take "+lastPoint.getString("name")+" towards "+destination);
 							((TextView)row.findViewById(R.id.to)).setText(mode.getString("desc"));
 							((TextView)row.findViewById(R.id.duration)).setText("Average journey time: "+duration);
+						} else if(position <= length-1) {
+							JSONObject leg = legs.get(legs.size()-1);
+							((TextView)row.findViewById(R.id.from)).setText(leg.getJSONObject("mode").getString("destination"));
 						} else {
+							// XXX show stop to get off
 							((TextView)row.findViewById(R.id.content)).setText(trip.toString());
 						}
 						return row;
@@ -151,7 +155,7 @@ public class JourneyResult extends Activity {
 					return position;
 				}
 				@Override public int getCount() {
-					return length+1;
+					return length+2;
 				}
 			});
 			layoutMain.setVisibility(View.GONE);
