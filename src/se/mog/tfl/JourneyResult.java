@@ -3,17 +3,16 @@ package se.mog.tfl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import se.mog.tfl.TflJson.Trip;
+import se.mog.tfl.TflJson.Trip.Leg;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -30,9 +29,9 @@ import android.widget.*;
 public class JourneyResult extends Activity {
 	private static final String TAG = "JourneyResult";
 	private ListView list;
-	private List<JSONObject> tripsList;
 	private LinearLayout layoutMain, layoutDetails;
 	private String from, to;
+	protected TflJson json;
 
 	@Override protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -73,11 +72,10 @@ public class JourneyResult extends Activity {
 					return;
 				}
 				try {
-					JSONObject object = new JSONObject(response.toString());
-					tripsList = json_toArray(object.get("trips"));
+					json = new TflJson(response.toString());
 				} catch (JSONException e) {
-					e.printStackTrace();
-					throw new RuntimeException();
+					exitError(e);
+					return;
 				}
 				layoutMain = (LinearLayout) findViewById(R.id.layout_main);
 				layoutDetails = (LinearLayout) findViewById(R.id.layout_details);
@@ -85,7 +83,7 @@ public class JourneyResult extends Activity {
 				list.setAdapter(resultAdapter);
 				list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 					@Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-						showDetails(tripsList.get(position));
+						showDetails(position);
 					}
 				});
 		    	((TextView)layoutMain.findViewById(R.id.title)).setText("From "+from+" To "+to);
@@ -96,65 +94,27 @@ public class JourneyResult extends Activity {
 	private LayoutInflater inflater;
 	private HttpGet request;
 
-	/**
-	 * Fix TfLs wier format for single item arrays.
-	 * 
-	 * Example for single item:
-	 * {trips:{trip: <trip1> }}
-	 * 
-	 * Example for 2+ items:
-	 * {trips:[<trip1>, <trip2>, ...]}
-	 * 
-	 * @param unknownObject The trips object which is either a JSONArray or JSONObject containing a single property.
-	 * @return List of JSONObjects contained in the JSONArray or the value of the single property if it's JSONObject
-	 */
-	private static List<JSONObject> json_toArray(Object unknownObject) throws JSONException {
-		if(unknownObject instanceof JSONArray) {
-			JSONArray array = (JSONArray)unknownObject;
-			ArrayList<JSONObject> array2 = new ArrayList<JSONObject>(array.length());
-			for (int i = 0; i < array.length(); i++) {
-				array2.add(array.getJSONObject(i));
-			}
-			return array2;
-		} else {
-			JSONObject object = (JSONObject)unknownObject;
-			String singular = (String)object.names().get(0);
-			return Collections.singletonList(object.getJSONObject(singular));
-		}
-	}
-	protected void showDetails(final JSONObject trip) {
+	public void showDetails(int position) {
+		final TflJson.Trip trip = json.getTrip(position);
 		try {
 			ListView list = (ListView) layoutDetails.findViewById(R.id.list);
-			final String duration = trip.getString("duration");
-			final List<JSONObject> legs = json_toArray(trip.get("legs"));
+			final List<TflJson.Trip.Leg> legs = trip.getLegs();
 			final int length = legs.size();
 			list.setAdapter(new BaseAdapter() {
 				@Override public View getView(int position, View convertView, ViewGroup parent) {
 					try {
 						View row = inflater.inflate(R.layout.result_details_row, null);
-						if(position <= length-2) {
-							JSONObject leg = legs.get(position);
-							JSONObject mode = leg.getJSONObject("mode");
-							String destination = mode.optString("destination");
-							//((TextView)row.findViewById(R.id.content)).setText(leg.toString());
-
-							List<JSONObject> points = json_toArray(leg.get("points"));
-							if(points.size() != 2) throw new RuntimeException(leg.toString());
-							JSONObject firstPoint = points.get(0);
-							JSONObject lastPoint = points.get(1);
-
-							((TextView)row.findViewById(R.id.start)).setText(firstPoint.getJSONObject("dateTime").getString("time"));
-							((TextView)row.findViewById(R.id.type)).setText(mode2string(mode));
-							((TextView)row.findViewById(R.id.from)).setText(firstPoint.getString("name"));
-							//((TextView)row.findViewById(R.id.to)).setText("Take "+lastPoint.getString("name")+" towards "+destination);
-							((TextView)row.findViewById(R.id.to)).setText(mode.getString("desc"));
-							((TextView)row.findViewById(R.id.duration)).setText("Average journey time: "+duration);
-						} else if(position <= length-1) {
-							JSONObject leg = legs.get(legs.size()-1);
-							((TextView)row.findViewById(R.id.from)).setText(leg.getJSONObject("mode").getString("destination"));
+						if(position <= length-1) {
+							Leg leg = legs.get(position);
+							((TextView)row.findViewById(R.id.start)).setText(leg.getStartTime());
+							((ImageView)row.findViewById(R.id.type)).setImageResource(leg.getImageResource());
+							((TextView)row.findViewById(R.id.from)).setText(leg.getFrom());
+							((TextView)row.findViewById(R.id.to)).setText(Html.fromHtml(leg.getDestination()));
+							// XXX
+							//((TextView)row.findViewById(R.id.duration)).setText("Average journey time: "+);
 						} else {
-							// XXX show stop to get off
-							((TextView)row.findViewById(R.id.content)).setText(trip.toString());
+							Leg leg = legs.get(legs.size()-1);
+							((TextView)row.findViewById(R.id.from)).setText(leg.getTo());
 						}
 						return row;
 					} catch (JSONException e) {
@@ -168,13 +128,14 @@ public class JourneyResult extends Activity {
 					return position;
 				}
 				@Override public int getCount() {
-					return length+2;
+					return length+1;
 				}
 			});
 			layoutMain.setVisibility(View.GONE);
 			layoutDetails.setVisibility(View.VISIBLE);
 		} catch(JSONException e) {
-			throw new RuntimeException(e);
+			exitError(e);
+			return;
 		}
 	}
 
@@ -234,8 +195,7 @@ public class JourneyResult extends Activity {
 
 	private BaseAdapter resultAdapter = new BaseAdapter() {
 		@Override public int getCount() {
-			Log.d(TAG, "getCount(): "+tripsList.size());
-			return tripsList.size();
+			return json.getTrips().size();
 		}
 
 		@Override public Object getItem(int position) {
@@ -249,24 +209,11 @@ public class JourneyResult extends Activity {
 		@Override public View getView(int position, View convertView, ViewGroup parent) {
 			try {
 				Log.d(TAG, "getView("+position+")");
-				JSONObject trip = tripsList.get(position);
-				String duration = trip.getString("duration");
+				Trip trip = json.getTrip(position);
+				String duration = trip.getDuration();
 
-				List<JSONObject> legs = json_toArray(trip.get("legs"));
-				JSONObject firstLeg = legs.get(0);
-				JSONArray firstLegPoints = firstLeg.getJSONArray("points");
-				JSONObject firstPoint = firstLegPoints.getJSONObject(0);
-				String start = firstPoint.getJSONObject("dateTime").getString("time");
-
-				JSONObject lastLeg = legs.get(legs.size()-1);
-				JSONArray lastLegPoints = lastLeg.getJSONArray("points");
-				JSONObject lastPoint = lastLegPoints.getJSONObject(lastLegPoints.length()-1);
-				String end = lastPoint.getJSONObject("dateTime").getString("time");
-
-				List<String> types = new ArrayList<String>();
-				for(JSONObject leg : legs) {
-					types.add(mode2string(leg.getJSONObject("mode")));
-				}
+				String start = trip.getStartTime();
+				String end = trip.getStopTime();
 
 				if(convertView == null) {
 					convertView = inflater.inflate(R.layout.result_row, null);
@@ -274,28 +221,32 @@ public class JourneyResult extends Activity {
 				//((TextView)convertView.findViewById(R.id.content)).setText(trip.toString());
 				((TextView)convertView.findViewById(R.id.start)).setText(start);
 				((TextView)convertView.findViewById(R.id.duration)).setText(duration);
-				((TextView)convertView.findViewById(R.id.types)).setText(types.toString());
+				LinearLayout typesLayout = ((LinearLayout)convertView.findViewById(R.id.types));
+				for(Leg leg : trip.getLegs()) {
+					ImageView image = new ImageView(JourneyResult.this);
+					image.setImageResource(leg.getImageResource());
+					typesLayout.addView(image);
+				}
 				((TextView)convertView.findViewById(R.id.end)).setText(end);
 				Log.d(TAG, "getView() "+convertView);
 				return convertView;
 			} catch (JSONException e) {
-				throw new RuntimeException(e);
+				exitError(e);
+				return null;
 			}
 		}
 	};
-//	private static class ViewHolder {
-//		TextView text1, text2;
-//	}
+
 	private static String mode2string(JSONObject mode) throws JSONException {
 		StringBuilder sb = new StringBuilder();
-		String type = mode.getString("type");
+		int type = mode.getInt("type");
 		String code = mode.optString("code");
 		
 		sb.append(type);
 		if(code != null) {
 			sb.append(":"+code);
 		}
-		switch(Integer.parseInt(type)) {
+		switch(type) {
 		case 1:
 			// tube
 			sb.append(" ("+mode.getString("name")+")");
@@ -317,7 +268,12 @@ public class JourneyResult extends Activity {
 		new AlertDialog.Builder(this)
 			.setTitle("Error occured")
 			.setMessage(e.getMessage())
-			.setPositiveButton("Back", new DialogInterface.OnClickListener() {
+			.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+				@Override public void onClick(DialogInterface dialog, int which) {
+					showResults();
+				}
+			})
+			.setNegativeButton("Back", new DialogInterface.OnClickListener() {
 				@Override public void onClick(DialogInterface dialog, int which) {
 					finish();
 				}

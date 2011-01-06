@@ -5,6 +5,11 @@
 		a:id="@+id/layout_main"
 	    a:layout_width="fill_parent" a:layout_height="fill_parent">
 	
+		<ImageView a:id="@+id/logo"
+				   a:src="@drawable/logo"
+				   a:scaleType="center"
+				   a:padding="20dip"
+				   a:layout_width="fill_parent" a:layout_height="wrap_content"/>
 		<Button a:id="@+id/btn_from" a:text="from"
 				a:onClick="onClickFrom"
 				a:layout_width="fill_parent" a:layout_height="wrap_content"/>

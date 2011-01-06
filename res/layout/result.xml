@@ -16,6 +16,7 @@
 		<TextView a:id="@+id/title" a:text="Route details"
 	    	a:layout_width="fill_parent" a:layout_height="wrap_content"/>
 	   	<ListView a:id="@+id/list"
+	   		a:clickable="false"
 	    	a:layout_width="fill_parent" a:layout_height="fill_parent"/>
 	</LinearLayout>
 </FrameLayout>

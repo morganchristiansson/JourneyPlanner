@@ -15,6 +15,7 @@
 			a:gravity="right"
 		    a:layout_width="wrap_content" a:layout_height="wrap_content"/>
     </LinearLayout>
-    <TextView a:id="@+id/types"
-	    a:layout_width="wrap_content" a:layout_height="wrap_content"/>
+    <LinearLayout a:id="@+id/types"
+    	a:gravity="center"
+	    a:layout_width="fill_parent" a:layout_height="wrap_content"/>
 </LinearLayout>
