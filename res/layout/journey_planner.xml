@@ -29,6 +29,7 @@
 				  a:visibility="gone"
 				  a:layout_width="fill_parent" a:layout_height="fill_parent">
 		<EditText a:id="@+id/text_from"
+				  a:inputType="text" a:imeOptions="actionGo"
 				  a:layout_width="fill_parent" a:layout_height="wrap_content"/>
 		<ListView a:id="@+id/list_from"
 				  a:layout_width="fill_parent" a:layout_height="fill_parent"/>
@@ -38,6 +39,7 @@
 				  a:visibility="gone"
 				  a:layout_width="fill_parent" a:layout_height="fill_parent">
 		<EditText a:id="@+id/text_to"
+				  a:inputType="text" a:imeOptions="actionGo"
 				  a:layout_width="fill_parent" a:layout_height="wrap_content"/>
 		<ListView a:id="@+id/list_to"
 				  a:layout_width="fill_parent" a:layout_height="fill_parent"/>

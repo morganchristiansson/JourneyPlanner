@@ -1,6 +1,7 @@
 package se.mog.tfl;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.CursorIndexOutOfBoundsException;
@@ -8,7 +9,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
+import android.widget.TextView.OnEditorActionListener;
 
 public class JourneyPlanner extends Activity {
 	private static final String TAG = "JourneyPlanner";
@@ -60,7 +63,23 @@ public class JourneyPlanner extends Activity {
 				back();
 			}
 		});
+        textFrom.setOnEditorActionListener(editorActionListener);
+        textTo.setOnEditorActionListener(editorActionListener);
     }
+	
+	private TextView.OnEditorActionListener editorActionListener = new TextView.OnEditorActionListener() {
+// XXX select [origin/destionation]_type:
+//		Station or stop
+//		Post code
+//		Address
+//		Place of interest 
+		@Override public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+			InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+			imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+			backExtra();
+			return false;
+		}
+	};
 
 	public void onClickFrom(View from) {
         layoutMain.setVisibility(View.GONE   );
@@ -89,20 +108,24 @@ public class JourneyPlanner extends Activity {
     	Intent i = new Intent(this, JourneyResult.class);
     	if("".equals(from)) return; // XXX
     	if("".equals(to  )) return; // XXX
-    	i.putExtra("from", from);
-    	i.putExtra("to"  , to  );
+    	i.putExtra("from", from.toString());
+    	i.putExtra("to"  , to  .toString());
     	startActivity(i);
 	}
 
 	@Override public boolean onKeyDown(int keyCode, KeyEvent event)  {
         if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0 && layoutMain.getVisibility() != View.VISIBLE) {
-        	back();
-        	if(activeLayout == layoutFrom) buttonFrom.setText(textFrom.getText());
-        	if(activeLayout == layoutTo  ) buttonTo  .setText(textTo  .getText());
+        	backExtra();
         	return false;
         }
         return super.onKeyDown(keyCode, event);
     }
+
+	private void backExtra() {
+    	if(activeLayout == layoutFrom) buttonFrom.setText(textFrom.getText());
+    	if(activeLayout == layoutTo  ) buttonTo  .setText(textTo  .getText());
+    	back();
+	}
 
 	private void back() {
     	layoutMain.setVisibility(View.VISIBLE);
