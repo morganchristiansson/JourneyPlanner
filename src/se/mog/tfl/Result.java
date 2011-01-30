@@ -9,10 +9,8 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
-import org.json.JSONObject;
-
-import se.mog.tfl.TflJson.Trip;
-import se.mog.tfl.TflJson.Trip.Leg;
+import se.mog.tfl.JsonResult.Trip;
+import se.mog.tfl.JsonResult.Trip.Leg;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -26,12 +24,12 @@ import android.util.Log;
 import android.view.*;
 import android.widget.*;
 
-public class JourneyResult extends Activity {
+public class Result extends Activity {
 	private static final String TAG = "JourneyResult";
 	private ListView list;
 	private LinearLayout layoutMain, layoutDetails;
 	private String from, to;
-	protected TflJson json;
+	protected JsonResult json;
 
 	@Override protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -40,7 +38,7 @@ public class JourneyResult extends Activity {
 		from = intent.getStringExtra("from");
 		to   = intent.getStringExtra("to"  );
 		
-    	inflater = LayoutInflater.from(JourneyResult.this);
+    	inflater = LayoutInflater.from(Result.this);
 		showResults();
 	}
 	private void showResults() {
@@ -72,7 +70,7 @@ public class JourneyResult extends Activity {
 					return;
 				}
 				try {
-					json = new TflJson(response.toString());
+					json = new JsonResult(response.toString());
 				} catch (JSONException e) {
 					exitError(e);
 					return;
@@ -95,10 +93,10 @@ public class JourneyResult extends Activity {
 	private HttpGet request;
 
 	public void showDetails(int position) {
-		final TflJson.Trip trip = json.getTrip(position);
+		final JsonResult.Trip trip = json.getTrip(position);
 		try {
 			ListView list = (ListView) layoutDetails.findViewById(R.id.list);
-			final List<TflJson.Trip.Leg> legs = trip.getLegs();
+			final List<JsonResult.Trip.Leg> legs = trip.getLegs();
 			final int length = legs.size();
 			list.setAdapter(new BaseAdapter() {
 				@Override public View getView(int position, View convertView, ViewGroup parent) {
@@ -223,7 +221,7 @@ public class JourneyResult extends Activity {
 				((TextView)convertView.findViewById(R.id.duration)).setText(duration);
 				LinearLayout typesLayout = ((LinearLayout)convertView.findViewById(R.id.types));
 				for(Leg leg : trip.getLegs()) {
-					ImageView image = new ImageView(JourneyResult.this);
+					ImageView image = new ImageView(Result.this);
 					image.setImageResource(leg.getImageResource());
 					typesLayout.addView(image);
 				}

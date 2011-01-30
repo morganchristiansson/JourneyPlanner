@@ -7,11 +7,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class TflJson {
+public class JsonResult {
 	private List<Trip> trips;
 	private JSONObject json;
 
-	public TflJson(String string) throws JSONException {
+	public JsonResult(String string) throws JSONException {
 		json = new JSONObject(string);
 		List trips = toArray(json.get("trips"));
 		for (int i = 0; i < trips.size(); i++) {

@@ -13,7 +13,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import android.widget.TextView.OnEditorActionListener;
 
-public class JourneyPlanner extends Activity {
+public class Planner extends Activity {
 	private static final String TAG = "JourneyPlanner";
 	private LinearLayout layoutMain, layoutFrom, layoutTo, activeLayout;
 	private Button buttonFrom, buttonTo;
@@ -22,7 +22,7 @@ public class JourneyPlanner extends Activity {
 	private HistoryDb db;
 	@Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.journey_planner);
+        setContentView(R.layout.planner);
         layoutMain = (LinearLayout)findViewById(R.id.layout_main);
         activeLayout = layoutMain;
         layoutFrom = (LinearLayout)findViewById(R.id.layout_from);
@@ -44,8 +44,8 @@ public class JourneyPlanner extends Activity {
 	        toCursor.moveToFirst();
 	        buttonTo.setText(toCursor.getString(toCursor.getColumnIndex("name")));
         } catch(CursorIndexOutOfBoundsException e) {}
-        listFrom.setAdapter(new SimpleCursorAdapter(this, R.layout.journey_planner_history_row, fromCursor, new String[] {"name"}, new int[] {R.id.name}));
-        listTo  .setAdapter(new SimpleCursorAdapter(this, R.layout.journey_planner_history_row, toCursor  , new String[] {"name"}, new int[] {R.id.name}));
+        listFrom.setAdapter(new SimpleCursorAdapter(this, R.layout.planner_history_row, fromCursor, new String[] {"name"}, new int[] {R.id.name}));
+        listTo  .setAdapter(new SimpleCursorAdapter(this, R.layout.planner_history_row, toCursor  , new String[] {"name"}, new int[] {R.id.name}));
         listFrom.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				CharSequence from = ((TextView)view.findViewById(R.id.name)).getText();
@@ -105,7 +105,7 @@ public class JourneyPlanner extends Activity {
     	CharSequence from = buttonFrom.getText();
     	CharSequence to   = buttonTo  .getText();
     	db.touch(from, to);
-    	Intent i = new Intent(this, JourneyResult.class);
+    	Intent i = new Intent(this, Result.class);
     	if("".equals(from)) return; // XXX
     	if("".equals(to  )) return; // XXX
     	i.putExtra("from", from.toString());
