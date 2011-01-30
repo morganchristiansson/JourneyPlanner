@@ -1,7 +1,6 @@
 package se.mog.tfl;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -124,7 +123,10 @@ public class TflJson {
 		}
 
 		public String getDuration() {
-			return duration;
+			String s = duration;
+			s += "m";
+			s.replaceFirst("^(\\d+):", "\\1h");
+			return s;
 		}
 
 		public Leg getFirstLeg() {
