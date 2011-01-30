@@ -237,33 +237,6 @@ public class JourneyResult extends Activity {
 		}
 	};
 
-	private static String mode2string(JSONObject mode) throws JSONException {
-		StringBuilder sb = new StringBuilder();
-		int type = mode.getInt("type");
-		String code = mode.optString("code");
-		
-		sb.append(type);
-		if(code != null) {
-			sb.append(":"+code);
-		}
-		switch(type) {
-		case 1:
-			// tube
-			sb.append(" ("+mode.getString("name")+")");
-			break;
-		case 3:
-			sb.append("[bus?]");
-			break;
-		case 6:
-			sb.append("[overground?]");
-			break;
-		case 99:
-			// walk
-			sb.append(" ("+mode.getString("desc")+")");
-			break;
-		}
-		return sb.toString();
-	}
 	private void exitError(Exception e) {
 		new AlertDialog.Builder(this)
 			.setTitle("Error occured")
