@@ -6,6 +6,8 @@ import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.List;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -212,10 +214,13 @@ public class Result extends Activity {
 			DefaultHttpClient client = new DefaultHttpClient();
 			request = new HttpGet(url);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
-			client.execute(request).getEntity().writeTo(baos);
-			String response = baos.toString();
-			Log.d(TAG, "response="+response);
-			return response;
+			HttpResponse response = client.execute(request);
+			StatusLine s = response.getStatusLine();
+			if(s.getStatusCode() != 200) throw new IOException(s.getStatusCode()+" "+s.getReasonPhrase());
+			response.getEntity().writeTo(baos);
+			String responseText = baos.toString();
+			Log.d(TAG, "response="+responseText);
+			return responseText;
 		} finally {
 			request = null;
 		}

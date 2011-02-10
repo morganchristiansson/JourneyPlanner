@@ -13,9 +13,10 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
+import android.widget.AdapterView.OnItemLongClickListener;
 
 public class Planner extends Activity {
-	private static final String TAG = "JourneyPlanner";
+	static final String TAG = "JourneyPlanner";
 //	<select name="type_origin" id="type_origin">
 //    <option value="stop">Station or stop</option>
 //    <option value="locator">Post code</option>
@@ -61,20 +62,8 @@ public class Planner extends Activity {
         typeFrom     = (Spinner)findViewById(R.id.type_from);
         typeTo       = (Spinner)findViewById(R.id.type_to  );
         db           = new HistoryDb(this);
-        Cursor fromCursor = db.getFrom();
-        Cursor toCursor   = db.getTo();
-        try {
-	        fromCursor.moveToFirst();
-	        setFrom(fromCursor.getString(fromCursor.getColumnIndex("name")),
-	        		fromCursor.getString(fromCursor.getColumnIndex("type")));
-        } catch(CursorIndexOutOfBoundsException e) {}
-        try {
-	        toCursor.moveToFirst();
-	        setTo(toCursor.getString(toCursor.getColumnIndex("name")),
-	        	  toCursor.getString(toCursor.getColumnIndex("type")));
-        } catch(CursorIndexOutOfBoundsException e) {}
-        listFrom.setAdapter(new SimpleCursorAdapter(this, R.layout.planner_history_row, fromCursor, new String[] {"name"}, new int[] {R.id.name}));
-        listTo  .setAdapter(new SimpleCursorAdapter(this, R.layout.planner_history_row, toCursor  , new String[] {"name"}, new int[] {R.id.name}));
+        setFromAdapter();
+        setToAdapter();
         listFrom.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				CharSequence from = ((TextView)view.findViewById(R.id.name)).getText();
@@ -83,11 +72,29 @@ public class Planner extends Activity {
 				back();
 			}
 		});
+        listFrom.setOnItemLongClickListener(new OnItemLongClickListener() {
+			@Override public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				CharSequence from = ((TextView)view.findViewById(R.id.name)).getText();
+				Log.d(TAG, "longpressed from="+from);
+				db.clearFrom(from);
+				setFromAdapter();
+				return true;
+			}
+		});
         listTo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 				CharSequence to = ((TextView)view.findViewById(R.id.name)).getText();
 				setTo(to, getToSpinnerValue());
 				back();
+			}
+		});
+        listTo.setOnItemLongClickListener(new OnItemLongClickListener() {
+        	@Override public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+				CharSequence to = ((TextView)view.findViewById(R.id.name)).getText();
+				Log.d(TAG, "longpressed to="+to);
+				db.clearTo(to);
+				setToAdapter();
+				return true;
 			}
 		});
         textFrom.setOnEditorActionListener(editorActionListener);
@@ -99,7 +106,25 @@ public class Planner extends Activity {
         analytics.start("UA-21761998-1", this);
         analytics.trackPageView("/");
     }
+
+	private void setFromAdapter() {
+        Cursor fromCursor = db.getFrom();
+        try {
+	        fromCursor.moveToFirst();
+	        buttonFrom.setText(fromCursor.getString(fromCursor.getColumnIndex("from")));
+        } catch(CursorIndexOutOfBoundsException e) {}
+        listFrom.setAdapter(new SimpleCursorAdapter(this, R.layout.planner_history_row, fromCursor, new String[] {"from"}, new int[] {R.id.name}));
+	}
 	
+	private void setToAdapter() {
+        Cursor toCursor   = db.getTo();
+        try {
+	        toCursor.moveToFirst();
+	        buttonTo.setText(toCursor.getString(toCursor.getColumnIndex("to")));
+        } catch(CursorIndexOutOfBoundsException e) {}
+        listTo  .setAdapter(new SimpleCursorAdapter(this, R.layout.planner_history_row, toCursor  , new String[] {"to"  }, new int[] {R.id.name}));
+	}
+
 	private TextView.OnEditorActionListener editorActionListener = new TextView.OnEditorActionListener() {
 // XXX select [origin/destionation]_type:
 //		Station or stop
