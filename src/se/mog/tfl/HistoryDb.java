@@ -67,6 +67,6 @@ public class HistoryDb extends SQLiteOpenHelper {
 		gc(db);
 	}
 	public void gc(SQLiteDatabase db) {
-		db.execSQL("DELETE FROM history WHERE `from`=NULL AND `to`=NULL");
+		db.execSQL("DELETE FROM history WHERE `from` IS NULL AND `to` IS NULL");
 	}
 }
