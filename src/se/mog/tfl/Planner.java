@@ -1,5 +1,7 @@
 package se.mog.tfl;
 
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +22,7 @@ public class Planner extends Activity {
 	private TextView textFrom, textTo;
 	private ListView listFrom, listTo;
 	private HistoryDb db;
+	private GoogleAnalyticsTracker analytics;
 	@Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.planner);
@@ -65,6 +68,9 @@ public class Planner extends Activity {
 		});
         textFrom.setOnEditorActionListener(editorActionListener);
         textTo.setOnEditorActionListener(editorActionListener);
+        analytics = GoogleAnalyticsTracker.getInstance();
+        analytics.start("UA-21761998-1", this);
+        analytics.trackPageView("/");
     }
 	
 	private TextView.OnEditorActionListener editorActionListener = new TextView.OnEditorActionListener() {
@@ -85,12 +91,14 @@ public class Planner extends Activity {
         layoutMain.setVisibility(View.GONE   );
         layoutFrom.setVisibility(View.VISIBLE);
         activeLayout = layoutFrom;
+        analytics.trackPageView("/from");
     }
 
 	public void onClickTo(View to) {
         layoutMain.setVisibility(View.GONE   );
         layoutTo  .setVisibility(View.VISIBLE);
         activeLayout = layoutTo;
+        analytics.trackPageView("/to");
     }
 
 	public void onClickReverse(View reverse) {
@@ -100,6 +108,7 @@ public class Planner extends Activity {
     	  textFrom.setText(to  );
     	buttonTo  .setText(from);
     	  textTo  .setText(from);
+	    analytics.trackPageView("/reverse");
     }
 	public void onClickSearch(View search) {
     	CharSequence from = buttonFrom.getText();

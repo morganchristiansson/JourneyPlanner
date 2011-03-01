@@ -9,6 +9,9 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
+
+import com.google.android.apps.analytics.GoogleAnalyticsTracker;
+
 import se.mog.tfl.JsonResult.Trip;
 import se.mog.tfl.JsonResult.Trip.Leg;
 import android.app.Activity;
@@ -30,6 +33,7 @@ public class Result extends Activity {
 	private LinearLayout layoutMain, layoutDetails;
 	private String from, to;
 	protected JsonResult json;
+	private GoogleAnalyticsTracker tracker;
 
 	@Override protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -40,6 +44,8 @@ public class Result extends Activity {
 		
     	inflater = LayoutInflater.from(Result.this);
 		showResults();
+		tracker = GoogleAnalyticsTracker.getInstance();
+		tracker.trackPageView("/result?from="+from+"&to="+to);
 	}
 	private void showResults() {
 		final ProgressDialog dialog = ProgressDialog.show(this, "Please wait", "Communicating with TfL");
