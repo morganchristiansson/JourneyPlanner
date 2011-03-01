@@ -19,6 +19,7 @@ public class HistoryDb extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE history (" +
         		   " _id INTEGER PRIMARY KEY AUTOINCREMENT," +
         		   " name TEXT," +
+        		   " type TEXT," +
         		   " last_from INTEGER," +
         		   " last_to   INTEGER," +
         		   " UNIQUE (name)" +
@@ -40,17 +41,17 @@ public class HistoryDb extends SQLiteOpenHelper {
 		return db.rawQuery(sql, null);
 	}
 
-	public void touch(CharSequence from, CharSequence to) {
+	public void touch(CharSequence from, CharSequence fromType, CharSequence to, CharSequence toType) {
 		SQLiteDatabase db = getWritableDatabase();
 		try {
-			db.execSQL("INSERT INTO history (name, last_from) VALUES(?, DATETIME('now'))", new Object[]{from});
+			db.execSQL("INSERT INTO history (name, type, last_from) VALUES(?, ?, DATETIME('now'))", new Object[]{from, fromType});
 		} catch(SQLiteConstraintException e) {
-			db.execSQL("UPDATE history SET last_from=DATETIME('now') WHERE name=?", new Object[]{from});
+			db.execSQL("UPDATE history SET last_from=DATETIME('now') WHERE name=? AND type=?", new Object[]{from, fromType});
 		}
 		try {
-			db.execSQL("INSERT INTO history (name, last_to) VALUES(?, DATETIME('now'))", new Object[]{to});
+			db.execSQL("INSERT INTO history (name, type, last_to) VALUES(?, ?, DATETIME('now'))", new Object[]{to, toType});
 		} catch(SQLiteConstraintException e) {
-			db.execSQL("UPDATE history SET last_to=DATETIME('now') WHERE name=?", new Object[]{to});
+			db.execSQL("UPDATE history SET last_to=DATETIME('now') WHERE name=? AND type=?", new Object[]{to, toType});
 		}
 	}
 }
