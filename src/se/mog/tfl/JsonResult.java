@@ -8,12 +8,23 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class JsonResult {
+	public class NoTripsFoundException extends Exception {
+		public NoTripsFoundException(JSONException e) {
+			super(e);
+		}
+	}
+
 	private List<Trip> trips;
 	private JSONObject json;
 
-	public JsonResult(String string) throws JSONException {
+	public JsonResult(String string) throws JSONException, NoTripsFoundException {
 		json = new JSONObject(string);
-		List trips = toArray(json.get("trips"));
+		List trips;
+		try {
+			trips = toArray(json.get("trips"));
+		} catch(JSONException e) {
+			throw new NoTripsFoundException(e);
+		}
 		for (int i = 0; i < trips.size(); i++) {
 			trips.set(i, new Trip((JSONObject) trips.get(i)));
 		}
@@ -74,9 +85,10 @@ public class JsonResult {
 			public String getDestination() throws JSONException {
 				switch(type) {
 				case 3: //bus with stop letter information
-					return leg.getJSONObject("mode").getString("desc");
+				case 100:
+					return mode.getString("desc");
 				default:
-					return "Towards "+leg.getJSONObject("mode").getString("destination");
+					return "Towards "+mode.getString("destination");
 				}
 			}
 

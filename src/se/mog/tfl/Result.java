@@ -3,6 +3,7 @@ package se.mog.tfl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.util.List;
 
 import org.apache.http.client.ClientProtocolException;
@@ -12,6 +13,7 @@ import org.json.JSONException;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
+import se.mog.tfl.JsonResult.NoTripsFoundException;
 import se.mog.tfl.JsonResult.Trip;
 import se.mog.tfl.JsonResult.Trip.Leg;
 import android.app.Activity;
@@ -33,7 +35,7 @@ public class Result extends Activity {
 	private LinearLayout layoutMain, layoutDetails;
 	private String from, to;
 	protected JsonResult json;
-	private GoogleAnalyticsTracker tracker;
+	private GoogleAnalyticsTracker analytics;
 
 	@Override protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -44,8 +46,9 @@ public class Result extends Activity {
 		
     	inflater = LayoutInflater.from(Result.this);
 		showResults();
-		tracker = GoogleAnalyticsTracker.getInstance();
-		tracker.trackPageView("/result?from="+from+"&to="+to);
+		analytics = GoogleAnalyticsTracker.getInstance();
+        analytics.start("UA-21761998-1", this);
+		analytics.trackPageView("/result?from="+from+"&to="+to);
 	}
 	private void showResults() {
 		final ProgressDialog dialog = ProgressDialog.show(this, "Please wait", "Communicating with TfL");
@@ -56,6 +59,7 @@ public class Result extends Activity {
 		});
 		new AsyncTask<Void, Void, String>() {
 			private Exception exception = null;
+			private String title, message;
 			@Override protected String doInBackground(Void... params) {
 				try {
 					String response = getIntent().getStringExtra("response");
@@ -63,7 +67,13 @@ public class Result extends Activity {
 						response = getResponse(getUrl());
 					}
 					return response;
+				} catch(IOException e) {
+					Log.w(TAG, e);
+					title="Network error";
+					message="Error while communicating with Tfl";
+					return null;
 				} catch(Exception e) {
+					Log.w(TAG, e);
 					exception = e;
 					return null;
 				}
@@ -71,27 +81,37 @@ public class Result extends Activity {
 //		  		String response = "{  parameters:[   {    name:\"requestID\",    value:0},   {    name:\"sessionID\",    value:0}],  trips:[   {    duration:\"00:03\",    interchanges:0,    desc:0,    legs:[     {      points:[       {        name:\"Tottenham Court Road Station\",        usage:\"departure\",        desc:\"Departure from <b>Tottenham Court Road Station</b> at <b>03:34</b>. <a target=\'_blank\' href=\\\"XSLT_REQUEST?language=en&itdLPxx_src=FILELOAD?Filename=JP08__4D2142B13.pdf&itdLPxx_map=origin\\\">Print Map</a>\",        dateTime:{         date:\"3.01.2011\",         time:\"03:34\"},        stamp:{         date:20110103,         time:0334},        links:[         {          name:\"RM\",          type:\"RM\",          href:\"FILELOAD?Filename=JP08__4D2142B13.pdf\"},         {          name:\"SM\",          type:\"SM\",          href:\"tfl/TK_TottenhamCR.pdf\"}],        ref:{         id:1000235,         area:16,         platform:\"X\",         coords:\"529971,818593\"}},       {        name:\"Great Titchfield Street\",        usage:\"arrival\",        desc:\"Arrival at <b>Great Titchfield Street</b> at <b>03:35</b>. <a target=\'_blank\' href=\\\"XSLT_REQUEST?language=en&itdLPxx_src=FILELOAD?Filename=JP08__4D2142B14.pdf&itdLPxx_map=destination\\\">Print Map</a>\",        dateTime:{         date:\"3.01.2011\",         time:\"03:35\"},        stamp:{         date:20110103,         time:0335},        links:[         {          name:\"RM\",          type:\"RM\",          href:\"FILELOAD?Filename=JP08__4D2142B14.pdf\"},         {          name:\"SM\",          type:\"SM\",          href:\"tfl/SP_oxfordcircus_db.pdf\"}],        ref:{         id:1010689,         area:1,         platform:\"OP\",         coords:\"529231,818732\"}}],      mode:{       name:\"Bus N207\",       type:3,       code:5,       destination:\"Hayes By-Pass (UB3)\",       desc:\"Take Route Bus N207 towards Hayes By-Pass (UB3)<br/> or Route Bus N207 towards Belmont Road (UB8)\",       diva:{        branch:24,        line:207,        supplement:\"N\",        project:\"y05\",        network:\"tfl\"}}},     {      points:[       {        name:\"Great Titchfield Street\",        usage:\"departure\",        desc:\"Departure from <b>Great Titchfield Street</b> <a target=\'_blank\' href=\\\"XSLT_REQUEST?language=en&itdLPxx_src=FILELOAD?Filename=JP08__4D2142B14.pdf&itdLPxx_map=origin\\\">Print Map</a>\",        dateTime:{         date:\"3.01.2011\",         time:\"03:35\"},        stamp:{         date:20110103,         time:0335},        links:[         {          name:\"RM\",          type:\"RM\",          href:\"FILELOAD?Filename=JP08__4D2142B14.pdf\"},         {          name:\"SM\",          type:\"SM\",          href:\"tfl/SP_oxfordcircus_db.pdf\"}],        ref:{         id:1010689,         area:1,         platform:\"OP\",         coords:\"529231,818732\"}},       {        name:\"Oxford Circus\",        usage:\"arrival\",        desc:\"Arrival at <b>Oxford Circus</b> at 03:37 <a target=\'_blank\' href=\\\"XSLT_REQUEST?language=en&itdLPxx_src=FILELOAD?Filename=JP08__4D2142B15.pdf&itdLPxx_map=destination\\\">Print Map</a>\",        dateTime:{         date:\"3.01.2011\",         time:\"03:37\"},        stamp:{         date:20110103,         time:0337},        links:[         {          name:\"RM\",          type:\"RM\",          href:\"FILELOAD?Filename=JP08__4D2142B15.pdf\"},         {          name:\"SM\",          type:\"SM\",          href:\"tfl/TK_OxfordCircus.pdf\"}],        ref:{         id:1000173,         area:16,         coords:\"529085,818762\"}}],      mode:{       name:\"Fussweg\",       type:99,       desc:\"Walk to Oxford Circus\"},      turnInst:{       inst:{        dir:\"STRAIGHT\",        dist:149,        name:\"Oxford Street\",        coords:\"529230,818726\"}}}]},   {    duration:\"00:10\",    interchanges:0,    desc:-1,    legs:{     leg:{      points:[       {        name:\"Tottenham Court Road\",        usage:\"departure\",        desc:\"Departure from <b>Tottenham Court Road</b> <a target=\'_blank\' href=\\\"XSLT_REQUEST?language=en&itdLPxx_src=FILELOAD?Filename=JP08__4D2142B11.pdf&itdLPxx_map=origin\\\">Print Map</a>\",        dateTime:{         date:\"3.01.2011\",         time:\"03:29\"},        stamp:{         date:20110103,         time:0329},        links:{         link:{          name:\"RM\",          type:\"RM\",          href:\"FILELOAD?Filename=JP08__4D2142B11.pdf\"}},        ref:{         id:1000235,         coords:\"529806,818621\"}},       {        name:\"Oxford Circus\",        usage:\"arrival\",        desc:\"Arrival at <b>Oxford Circus</b> <a target=\'_blank\' href=\\\"XSLT_REQUEST?language=en&itdLPxx_src=FILELOAD?Filename=JP08__4D2142B11.pdf&itdLPxx_map=destination\\\">Print Map</a>\",        dateTime:{         date:\"3.01.2011\",         time:\"03:39\"},        stamp:{         date:20110103,         time:0339},        links:{         link:{          name:\"RM\",          type:\"RM\",          href:\"FILELOAD?Filename=JP08__4D2142B11.pdf\"}},        ref:{         id:1000173,         coords:\"529085,818762\"}}],      mode:{       name:\"Fussweg\",       type:100,       desc:\"Walk to Oxford Circus\"},      turnInst:{       inst:{        dir:\"STRAIGHT\",        dist:738,        name:\"Oxford Street\",        coords:\"529807,818625\"}}}}}]}";
 			}
 			protected void onPostExecute(String response) {
-				if(exception != null) {
-					exitError(exception);
-					return;
-				}
 				try {
-					json = new JsonResult(response.toString());
-				} catch (JSONException e) {
-					exitError(e);
-					return;
-				}
-				layoutMain = (LinearLayout) findViewById(R.id.layout_main);
-				layoutDetails = (LinearLayout) findViewById(R.id.layout_details);
-				list = (ListView)layoutMain.findViewById(R.id.list);
-				list.setAdapter(resultAdapter);
-				list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-					@Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-						showDetails(position);
+					if(message != null) {
+						exitError(title, message);
+						return;
 					}
-				});
-		    	((TextView)layoutMain.findViewById(R.id.title)).setText("From "+from+" To "+to);
-		    	dialog.dismiss();
+					if(exception != null) {
+						exitError(exception);
+						return;
+					}
+					try {
+						json = new JsonResult(response.toString());
+					} catch (JSONException e) {
+						exitError(e);
+						return;
+					} catch (NoTripsFoundException e) {
+						exitError("No results", "You probably misspelled something. Go back and check your typing");
+						return;
+					}
+					layoutMain = (LinearLayout) findViewById(R.id.layout_main);
+					layoutDetails = (LinearLayout) findViewById(R.id.layout_details);
+					list = (ListView)layoutMain.findViewById(R.id.list);
+					list.setAdapter(resultAdapter);
+					list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+						@Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+							showDetails(position);
+						}
+					});
+			    	((TextView)layoutMain.findViewById(R.id.title)).setText("From "+from+" To "+to);
+				} finally {
+					dialog.dismiss();
+				}
 			}
 		}.execute((Void[])null);
 	}
@@ -246,9 +266,13 @@ public class Result extends Activity {
 	};
 
 	private void exitError(Exception e) {
+		Log.w(TAG, e);
+		exitError("Exception occured", e.getMessage());
+	}
+	private void exitError(String title, String message) {
 		new AlertDialog.Builder(this)
-			.setTitle("Error occured")
-			.setMessage(e.getMessage())
+			.setTitle(title)
+			.setMessage(message)
 			.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
 				@Override public void onClick(DialogInterface dialog, int which) {
 					showResults();
