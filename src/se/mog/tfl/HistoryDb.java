@@ -55,18 +55,28 @@ public class HistoryDb extends SQLiteOpenHelper {
 		}
 	}
 
-	public void clearFrom(CharSequence from) {
+	public void clearFrom(CharSequence from, CharSequence from_type) {
 		SQLiteDatabase db = getWritableDatabase();
-		db.execSQL("UPDATE history SET `from`=NULL WHERE `from`=?", new Object[]{from});
+		db.execSQL("UPDATE history SET `from`=NULL, `from_type`=NULL WHERE `from`=? AND `from_type`=?", new Object[]{from, from_type});
 		gc(db);
+	}
+	public void clearFromFromCursor(Cursor fromCursor) {
+        clearFrom(fromCursor.getString(fromCursor.getColumnIndex("from")),
+        		  fromCursor.getString(fromCursor.getColumnIndex("from_type")));
 	}
 
-	public void clearTo(CharSequence to) {
+	public void clearTo(CharSequence to, CharSequence to_type) {
 		SQLiteDatabase db = getWritableDatabase();
-		db.execSQL("UPDATE history SET `to`=NULL WHERE `to`=?", new Object[]{to});
+		db.execSQL("UPDATE history SET `to`=NULL, `to_type`=NULL WHERE `to`=? AND `to_type`=?", new Object[]{to, to_type});
 		gc(db);
 	}
+	public void clearToFromCursor(Cursor toCursor) {
+        clearFrom(toCursor.getString(toCursor.getColumnIndex("to")),
+        		  toCursor.getString(toCursor.getColumnIndex("to_type")));
+	}
+
 	public void gc(SQLiteDatabase db) {
 		db.execSQL("DELETE FROM history WHERE `from` IS NULL AND `to` IS NULL");
 	}
+
 }

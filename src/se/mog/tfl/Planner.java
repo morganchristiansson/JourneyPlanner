@@ -1,5 +1,7 @@
 package se.mog.tfl;
 
+import java.util.Arrays;
+
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
 import android.app.Activity;
@@ -46,6 +48,8 @@ public class Planner extends Activity {
 	private Spinner typeFrom, typeTo;
 	private HistoryDb db;
 	private GoogleAnalyticsTracker analytics;
+	private Cursor fromCursor;
+	private Cursor toCursor;
 	@Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.planner);
@@ -66,9 +70,11 @@ public class Planner extends Activity {
         setToAdapter();
         listFrom.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				CharSequence from = ((TextView)view.findViewById(R.id.name)).getText();
+				fromCursor.moveToPosition(position);
+				CharSequence from = fromCursor.getString(fromCursor.getColumnIndex("from"));
+        		CharSequence from_type = fromCursor.getString(fromCursor.getColumnIndex("from_type"));
 				Log.d(TAG, "clicked from="+from);
-				setFrom(from, getFromSpinnerValue());
+				setFrom(from, from_type);
 				back();
 			}
 		});
@@ -76,23 +82,29 @@ public class Planner extends Activity {
 			@Override public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 				CharSequence from = ((TextView)view.findViewById(R.id.name)).getText();
 				Log.d(TAG, "longpressed from="+from);
-				db.clearFrom(from);
+				fromCursor.moveToPosition(position);
+				db.clearFromFromCursor(fromCursor);
 				setFromAdapter();
 				return true;
 			}
 		});
         listTo.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 			@Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-				CharSequence to = ((TextView)view.findViewById(R.id.name)).getText();
-				setTo(to, getToSpinnerValue());
+				toCursor.moveToPosition(position);
+				CharSequence to = toCursor.getString(toCursor.getColumnIndex("to"));
+				CharSequence to_type = toCursor.getString(toCursor.getColumnIndex("to_type"));
+				Log.d(TAG, "clicked to="+to);
+				setTo(to, to_type);
+				typeTo.setSelection(Arrays.asList(TYPE_SPINNER_KEYS).indexOf(to_type));
 				back();
 			}
 		});
         listTo.setOnItemLongClickListener(new OnItemLongClickListener() {
         	@Override public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
 				CharSequence to = ((TextView)view.findViewById(R.id.name)).getText();
-				Log.d(TAG, "longpressed to="+to);
-				db.clearTo(to);
+				Log.d(TAG, "longpressed from="+to);
+				toCursor.moveToPosition(position);
+				db.clearToFromCursor(toCursor);
 				setToAdapter();
 				return true;
 			}
@@ -108,23 +120,30 @@ public class Planner extends Activity {
     }
 
 	private void setFromAdapter() {
-        Cursor fromCursor = db.getFrom();
+        fromCursor = db.getFrom();
         try {
 	        fromCursor.moveToFirst();
-	        setFrom(fromCursor.getString(fromCursor.getColumnIndex("from")),
-	        		fromCursor.getString(fromCursor.getColumnIndex("from_type")));
+	        setFromFromCursor(fromCursor);
         } catch(CursorIndexOutOfBoundsException e) {}
         listFrom.setAdapter(new SimpleCursorAdapter(this, R.layout.planner_history_row, fromCursor, new String[] {"from"}, new int[] {R.id.name}));
 	}
-	
+	private void setFromFromCursor(Cursor fromCursor) {
+        setFrom(fromCursor.getString(fromCursor.getColumnIndex("from")),
+        		fromCursor.getString(fromCursor.getColumnIndex("from_type")));
+	}
+
 	private void setToAdapter() {
-        Cursor toCursor   = db.getTo();
+        toCursor = db.getTo();
         try {
 	        toCursor.moveToFirst();
-	        setTo(toCursor.getString(toCursor.getColumnIndex("to")),
-	        	  toCursor.getString(toCursor.getColumnIndex("to_type")));
+	        setToFromCursor(toCursor);
         } catch(CursorIndexOutOfBoundsException e) {}
         listTo  .setAdapter(new SimpleCursorAdapter(this, R.layout.planner_history_row, toCursor  , new String[] {"to"  }, new int[] {R.id.name}));
+	}
+
+	private void setToFromCursor(Cursor toCursor) {
+		setTo(toCursor.getString(toCursor.getColumnIndex("to")),
+	          toCursor.getString(toCursor.getColumnIndex("to_type")));
 	}
 
 	private TextView.OnEditorActionListener editorActionListener = new TextView.OnEditorActionListener() {
@@ -145,6 +164,7 @@ public class Planner extends Activity {
 
 	public void onClickFrom(View view) {
   	  	textFrom.setText(from);
+		typeFrom.setSelection(Arrays.asList(TYPE_SPINNER_KEYS).indexOf(fromType));
         layoutMain.setVisibility(View.GONE   );
         layoutFrom.setVisibility(View.VISIBLE);
         activeLayout = layoutFrom;
@@ -153,6 +173,7 @@ public class Planner extends Activity {
 
 	public void onClickTo(View view) {
 		textTo.setText(to);
+		typeTo.setSelection(Arrays.asList(TYPE_SPINNER_KEYS).indexOf(toType));
         layoutMain.setVisibility(View.GONE   );
         layoutTo  .setVisibility(View.VISIBLE);
         activeLayout = layoutTo;
@@ -169,7 +190,6 @@ public class Planner extends Activity {
 	    analytics.trackPageView("/reverse");
     }
 	public void onClickSearch(View search) {
-    	db.touch(from, fromType, to, toType);
     	Intent i = new Intent(this, Result.class);
     	if("".equals(from)) return; // XXX
     	if("".equals(to  )) return; // XXX
@@ -178,6 +198,9 @@ public class Planner extends Activity {
     	i.putExtra("name_destination", to    .toString());
     	i.putExtra("type_destination", toType.toString());
     	startActivity(i);
+    	db.touch(from, fromType, to, toType);
+    	setFromAdapter();
+    	setToAdapter();
 	}
 
 	@Override public boolean onKeyDown(int keyCode, KeyEvent event)  {
