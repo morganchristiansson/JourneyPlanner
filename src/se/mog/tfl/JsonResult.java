@@ -135,7 +135,7 @@ public class JsonResult {
 		}
 
 		public String getDuration() {
-			return duration.replaceFirst("^0?(\\d+):", "\\1h")+"m";
+			return duration.replaceFirst("^0?(\\d+):", "$1h")+"m";
 		}
 
 		public Leg getFirstLeg() {
