@@ -3,12 +3,15 @@
       package="se.mog.tfl"
       android:versionCode="1"
       android:versionName="1.0">
+    <uses-sdk android:minSdkVersion="15" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
     <application android:icon="@drawable/icon" android:label="@string/app_name"
-    			 android:theme="@android:style/Theme.Light"
-    			 android:debuggable="true">
+    			 android:theme="@android:style/Theme.Holo"
+    			 android:debuggable="false">
         <activity android:name=".Planner"
                   android:label="@string/app_name"
-                  android:theme="@android:style/Theme.Light.NoTitleBar">
+                  android:theme="@android:style/Theme.Holo.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -20,9 +23,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
     </application>
-    <uses-sdk android:minSdkVersion="3" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 </manifest>
