@@ -83,13 +83,15 @@ public class JsonResult {
 			}
 
 			public String getDestination() throws JSONException {
-				switch(type) {
-				case 3: //bus with stop letter information
-				case 100:
-					return mode.getString("desc");
-				default:
-					return "Towards "+mode.getString("destination");
-				}
+				return mode.getString("desc");
+//				switch(type) {
+//				case 3: //bus with stop letter information
+//				case 99:
+//				case 100:
+//					return mode.getString("desc");
+//				default:
+//					return "Towards "+mode.getString("destination");
+//				}
 			}
 
 			public int getImageResource() throws JSONException {
