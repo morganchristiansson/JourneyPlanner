@@ -111,7 +111,8 @@ public class Planner extends Activity {
         Cursor fromCursor = db.getFrom();
         try {
 	        fromCursor.moveToFirst();
-	        buttonFrom.setText(fromCursor.getString(fromCursor.getColumnIndex("from")));
+	        setFrom(fromCursor.getString(fromCursor.getColumnIndex("from")),
+	        		fromCursor.getString(fromCursor.getColumnIndex("from_type")));
         } catch(CursorIndexOutOfBoundsException e) {}
         listFrom.setAdapter(new SimpleCursorAdapter(this, R.layout.planner_history_row, fromCursor, new String[] {"from"}, new int[] {R.id.name}));
 	}
@@ -120,7 +121,8 @@ public class Planner extends Activity {
         Cursor toCursor   = db.getTo();
         try {
 	        toCursor.moveToFirst();
-	        buttonTo.setText(toCursor.getString(toCursor.getColumnIndex("to")));
+	        setTo(toCursor.getString(toCursor.getColumnIndex("to")),
+	        	  toCursor.getString(toCursor.getColumnIndex("to_type")));
         } catch(CursorIndexOutOfBoundsException e) {}
         listTo  .setAdapter(new SimpleCursorAdapter(this, R.layout.planner_history_row, toCursor  , new String[] {"to"  }, new int[] {R.id.name}));
 	}
