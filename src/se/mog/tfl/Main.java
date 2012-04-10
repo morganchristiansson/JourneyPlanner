@@ -111,7 +111,7 @@ public class Main extends Activity {
 		});
         textFrom.setOnEditorActionListener(editorActionListener);
         textTo.setOnEditorActionListener(editorActionListener);
-        ArrayAdapter a = new ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, TYPE_SPINNER_NAMES);
+        ArrayAdapter<String> a = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, TYPE_SPINNER_NAMES);
         typeFrom.setAdapter(a);
         typeTo  .setAdapter(a);
         analytics = GoogleAnalyticsTracker.getInstance();

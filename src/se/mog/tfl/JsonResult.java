@@ -9,6 +9,8 @@ import org.json.JSONObject;
 
 public class JsonResult {
 	public class NoTripsFoundException extends Exception {
+		private static final long serialVersionUID = -70106037811843652L;
+
 		public NoTripsFoundException(JSONException e) {
 			super(e);
 		}
@@ -19,16 +21,17 @@ public class JsonResult {
 
 	public JsonResult(String string) throws JSONException, NoTripsFoundException {
 		json = new JSONObject(string);
-		List trips;
+		ArrayList<JSONObject> trips1;
 		try {
-			trips = toArray(json.get("trips"));
+			trips1 = toArray(json.get("trips"));
 		} catch(JSONException e) {
 			throw new NoTripsFoundException(e);
 		}
-		for (int i = 0; i < trips.size(); i++) {
-			trips.set(i, new Trip((JSONObject) trips.get(i)));
+		ArrayList<Trip> trips2 = new ArrayList<Trip>(trips1.size());
+		for (int i = 0; i < trips1.size(); i++) {
+			trips2.set(i, new Trip((JSONObject) trips1.get(i)));
 		}
-		this.trips = trips;
+		this.trips = trips2;
 	}
 
 	public List<Trip> getTrips() {
@@ -39,14 +42,12 @@ public class JsonResult {
 	}
 
 	public static class Trip {
-		public class Leg {
-			private JSONObject leg;
+		public static class Leg {
 			private JSONObject mode;
 			private List<JSONObject> points;
 			private JSONObject firstPoint, lastPoint;
 			private int type;
 			public Leg(JSONObject leg) throws JSONException {
-				this.leg = leg;
 				this.mode = leg.getJSONObject("mode");
 				this.points = toArray(leg.get("points"));
 				if(points.size() != 2) throw new RuntimeException(leg.toString());
@@ -118,17 +119,16 @@ public class JsonResult {
 
 		}
 
-		private JSONObject trip;
 		private List<Leg> legs;
 		private String duration;
 
 		public Trip(JSONObject trip) throws JSONException {
-			this.trip = trip;
-			List legs = toArray(trip.get("legs"));
-			for (int i = 0; i < legs.size(); i++) {
-				legs.set(i, new Leg((JSONObject) legs.get(i)));
+			List<JSONObject> legs1 = toArray(trip.get("legs"));
+			List<Leg> legs2 = new ArrayList<Leg>(legs1.size());
+			for (int i = 0; i < legs1.size(); i++) {
+				legs2.set(i, new Leg((JSONObject) legs1.get(i)));
 			}
-			this.legs = legs;
+			this.legs = legs2;
 			this.duration = trip.getString("duration");
 		}
 
@@ -180,7 +180,7 @@ public class JsonResult {
 		} else {
 			JSONObject object = (JSONObject)unknownObject;
 			String singular = (String)object.names().get(0);
-			ArrayList array = new ArrayList(1);
+			ArrayList<JSONObject> array = new ArrayList<JSONObject>(1);
 			array.add(object.getJSONObject(singular));
 			return array;
 		}

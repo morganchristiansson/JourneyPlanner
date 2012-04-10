@@ -2,8 +2,8 @@ package se.mog.tfl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.net.UnknownHostException;
 import java.util.List;
 
 import org.apache.http.HttpResponse;
@@ -189,21 +189,26 @@ public class Result extends Activity {
 		return getUrl("lite");
 	}
 	private String getUrl(String mode) {
-		Intent intent      = getIntent();
-		String name_origin = intent.getStringExtra("name_origin");
-		String type_origin = intent.getStringExtra("type_origin");
-		String name_destination = intent.getStringExtra("name_destination");
-		String type_destination = intent.getStringExtra("type_destination");
-		String url  = "http://journeyplanner.tfl.gov.uk/"+mode+"/XSLT_TRIP_REQUEST2?" +
-					  "type_origin="+type_origin+"&" +
-					  "name_origin="+URLEncoder.encode(name_origin)+"&" +
-					  "place_origin=London&" +
-					  "type_destination="+type_destination+"&" +
-					  "name_destination="+URLEncoder.encode(name_destination)+"&" +
-					  "place_destination=London&" +
-					  //"calcNumberOfTrips=1&" +
-					  "language=en";
-		return url;
+		try {
+			Intent intent      = getIntent();
+			String name_origin = intent.getStringExtra("name_origin");
+			String type_origin = intent.getStringExtra("type_origin");
+			String name_destination = intent.getStringExtra("name_destination");
+			String type_destination = intent.getStringExtra("type_destination");
+			String url;
+			url = "http://journeyplanner.tfl.gov.uk/"+mode+"/XSLT_TRIP_REQUEST2?" +
+						  "type_origin="+type_origin+"&" +
+						  "name_origin="+URLEncoder.encode(name_origin, "UTF-8")+"&" +
+						  "place_origin=London&" +
+						  "type_destination="+type_destination+"&" +
+						  "name_destination="+URLEncoder.encode(name_destination, "UTF-8")+"&" +
+						  "place_destination=London&" +
+						  //"calcNumberOfTrips=1&" +
+						  "language=en";
+			return url;
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e);
+		}
 	}
 	private String getResponse(String url) throws ClientProtocolException, IOException {
     	//locator = postcode
