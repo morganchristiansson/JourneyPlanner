@@ -15,9 +15,9 @@ import org.json.JSONException;
 
 import com.google.android.apps.analytics.GoogleAnalyticsTracker;
 
+import se.mog.tfl.JsonResult.TripLeg;
 import se.mog.tfl.JsonResult.NoTripsFoundException;
 import se.mog.tfl.JsonResult.Trip;
-import se.mog.tfl.JsonResult.Trip.Leg;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
@@ -124,14 +124,14 @@ public class Result extends Activity {
 		final JsonResult.Trip trip = json.getTrip(position);
 		try {
 			ListView list = (ListView) layoutDetails.findViewById(R.id.list);
-			final List<JsonResult.Trip.Leg> legs = trip.getLegs();
+			final List<TripLeg> legs = trip.getLegs();
 			final int length = legs.size();
 			list.setAdapter(new BaseAdapter() {
 				@Override public View getView(int position, View convertView, ViewGroup parent) {
 					try {
 						View row = inflater.inflate(R.layout.result_details_row, null);
 						if(position <= length-1) {
-							Leg leg = legs.get(position);
+							TripLeg leg = legs.get(position);
 							((TextView)row.findViewById(R.id.start)).setText(leg.getStartTime());
 							((ImageView)row.findViewById(R.id.type)).setImageResource(leg.getImageResource());
 							((TextView)row.findViewById(R.id.from)).setText(leg.getFrom());
@@ -139,7 +139,7 @@ public class Result extends Activity {
 							// XXX
 							//((TextView)row.findViewById(R.id.duration)).setText("Average journey time: "+);
 						} else {
-							Leg leg = legs.get(legs.size()-1);
+							TripLeg leg = legs.get(legs.size()-1);
 							((TextView)row.findViewById(R.id.from)).setText(leg.getTo());
 						}
 						return row;
@@ -260,7 +260,7 @@ public class Result extends Activity {
 				((TextView)convertView.findViewById(R.id.start)).setText(start);
 				((TextView)convertView.findViewById(R.id.duration)).setText(duration);
 				LinearLayout typesLayout = ((LinearLayout)convertView.findViewById(R.id.types));
-				for(Leg leg : trip.getLegs()) {
+				for(TripLeg leg : trip.getLegs()) {
 					ImageView image = new ImageView(Result.this);
 					image.setImageResource(leg.getImageResource());
 					typesLayout.addView(image);

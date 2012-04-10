@@ -42,97 +42,20 @@ public class JsonResult {
 	}
 
 	public static class Trip {
-		public static class Leg {
-			private JSONObject mode;
-			private List<JSONObject> points;
-			private JSONObject firstPoint, lastPoint;
-			private int type;
-			public Leg(JSONObject leg) throws JSONException {
-				this.mode = leg.getJSONObject("mode");
-				this.points = toArray(leg.get("points"));
-				if(points.size() != 2) throw new RuntimeException(leg.toString());
-				this.firstPoint = points.get(0);
-				this.lastPoint = points.get(1);
-				this.type = mode.getInt("type");
-			}
-
-			public List<JSONObject> getPoints() {
-				return points;
-			}
-
-			public String getStartTime() throws JSONException {
-				return firstPoint.getJSONObject("dateTime").getString("time");
-			}
-			public String getStopTime() throws JSONException {
-				return lastPoint.getJSONObject("dateTime").getString("time");
-			}
-
-			public CharSequence getFrom() throws JSONException {
-				return firstPoint.getString("name");
-			}
-
-			public String getTo() throws JSONException {
-				switch(type) {
-				case 3:
-					return lastPoint.getString("name");
-				default:
-					if(mode.optInt("desc", -1) == 1) {
-						return getDestination();
-					}
-					return mode.getString("desc");
-				}
-			}
-
-			public String getDestination() throws JSONException {
-				return mode.getString("desc");
-//				switch(type) {
-//				case 3: //bus with stop letter information
-//				case 99:
-//				case 100:
-//					return mode.getString("desc");
-//				default:
-//					return "Towards "+mode.getString("destination");
-//				}
-			}
-
-			public int getImageResource() throws JSONException {
-				switch(type) {
-				case 1:
-					return R.drawable.icon_tube;
-				case 2:
-					return R.drawable.icon_dlr;
-				case 3:
-					return R.drawable.icon_buses;
-				case 6: // southern trains
-					return R.drawable.icon_rail;
-				case 12: //first capital connect
-					return R.drawable.icon_rail;
-				case 99:
-				case 100:
-					return R.drawable.icon_walk;
-				case 107:
-					return R.drawable.icon_cycle;
-				default:
-					return android.R.drawable.ic_dialog_alert;	
-				}
-			}
-
-		}
-
-		private List<Leg> legs;
+		private List<TripLeg> legs;
 		private String duration;
 
 		public Trip(JSONObject trip) throws JSONException {
 			List<JSONObject> legs1 = toArray(trip.get("legs"));
-			List<Leg> legs2 = new ArrayList<Leg>(legs1.size());
+			List<TripLeg> legs2 = new ArrayList<TripLeg>(legs1.size());
 			for (int i = 0; i < legs1.size(); i++) {
-				legs2.set(i, new Leg((JSONObject) legs1.get(i)));
+				legs2.set(i, new TripLeg((JSONObject) legs1.get(i)));
 			}
 			this.legs = legs2;
 			this.duration = trip.getString("duration");
 		}
 
-		public List<Leg> getLegs() throws JSONException {
+		public List<TripLeg> getLegs() throws JSONException {
 			return legs;
 		}
 
@@ -140,11 +63,11 @@ public class JsonResult {
 			return duration.replaceFirst("^0?(\\d+):", "$1h")+"m";
 		}
 
-		public Leg getFirstLeg() {
+		public TripLeg getFirstLeg() {
 			return legs.get(0);
 		}
 
-		public Leg getLastLeg() {
+		public TripLeg getLastLeg() {
 			return legs.get(legs.size()-1);
 		}
 
@@ -155,6 +78,83 @@ public class JsonResult {
 		public String getStopTime() throws JSONException {
 			return getLastLeg().getStopTime();
 		}
+	}
+
+	public static class TripLeg {
+		private JSONObject mode;
+		private List<JSONObject> points;
+		private JSONObject firstPoint, lastPoint;
+		private int type;
+		public TripLeg(JSONObject leg) throws JSONException {
+			this.mode = leg.getJSONObject("mode");
+			this.points = toArray(leg.get("points"));
+			if(points.size() != 2) throw new RuntimeException(leg.toString());
+			this.firstPoint = points.get(0);
+			this.lastPoint = points.get(1);
+			this.type = mode.getInt("type");
+		}
+
+		public List<JSONObject> getPoints() {
+			return points;
+		}
+
+		public String getStartTime() throws JSONException {
+			return firstPoint.getJSONObject("dateTime").getString("time");
+		}
+		public String getStopTime() throws JSONException {
+			return lastPoint.getJSONObject("dateTime").getString("time");
+		}
+
+		public CharSequence getFrom() throws JSONException {
+			return firstPoint.getString("name");
+		}
+
+		public String getTo() throws JSONException {
+			switch(type) {
+			case 3:
+				return lastPoint.getString("name");
+			default:
+				if(mode.optInt("desc", -1) == 1) {
+					return getDestination();
+				}
+				return mode.getString("desc");
+			}
+		}
+
+		public String getDestination() throws JSONException {
+			return mode.getString("desc");
+//				switch(type) {
+//				case 3: //bus with stop letter information
+//				case 99:
+//				case 100:
+//					return mode.getString("desc");
+//				default:
+//					return "Towards "+mode.getString("destination");
+//				}
+		}
+
+		public int getImageResource() throws JSONException {
+			switch(type) {
+			case 1:
+				return R.drawable.icon_tube;
+			case 2:
+				return R.drawable.icon_dlr;
+			case 3:
+				return R.drawable.icon_buses;
+			case 6: // southern trains
+				return R.drawable.icon_rail;
+			case 12: //first capital connect
+				return R.drawable.icon_rail;
+			case 99:
+			case 100:
+				return R.drawable.icon_walk;
+			case 107:
+				return R.drawable.icon_cycle;
+			default:
+				return android.R.drawable.ic_dialog_alert;	
+			}
+		}
+
 	}
 
 	/**
