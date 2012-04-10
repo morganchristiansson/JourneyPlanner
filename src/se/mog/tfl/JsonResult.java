@@ -20,18 +20,18 @@ public class JsonResult {
 	private JSONObject json;
 
 	public JsonResult(String string) throws JSONException, NoTripsFoundException {
-		json = new JSONObject(string);
-		ArrayList<JSONObject> trips1;
 		try {
+			json = new JSONObject(string);
+			ArrayList<JSONObject> trips1;
 			trips1 = toArray(json.get("trips"));
+			ArrayList<Trip> trips2 = new ArrayList<Trip>(trips1.size());
+			for (JSONObject trip : trips1) {
+				trips2.add(new Trip(trip));
+			}
+			this.trips = trips2;
 		} catch(JSONException e) {
 			throw new NoTripsFoundException(e);
 		}
-		ArrayList<Trip> trips2 = new ArrayList<Trip>(trips1.size());
-		for (int i = 0; i < trips1.size(); i++) {
-			trips2.set(i, new Trip((JSONObject) trips1.get(i)));
-		}
-		this.trips = trips2;
 	}
 
 	public List<Trip> getTrips() {
@@ -48,8 +48,8 @@ public class JsonResult {
 		public Trip(JSONObject trip) throws JSONException {
 			List<JSONObject> legs1 = toArray(trip.get("legs"));
 			List<TripLeg> legs2 = new ArrayList<TripLeg>(legs1.size());
-			for (int i = 0; i < legs1.size(); i++) {
-				legs2.set(i, new TripLeg((JSONObject) legs1.get(i)));
+			for (JSONObject tripLeg : toArray(trip.get("legs"))) {
+				legs2.add(new TripLeg(tripLeg));
 			}
 			this.legs = legs2;
 			this.duration = trip.getString("duration");

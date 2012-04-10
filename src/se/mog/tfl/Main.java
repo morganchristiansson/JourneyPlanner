@@ -46,7 +46,7 @@ public class Main extends Activity {
 	private TextView textFrom, textTo;
 	private ListView listFrom, listTo;
 	private Spinner typeFrom, typeTo;
-	private HistoryDb db;
+	HistoryDb db;
 	private GoogleAnalyticsTracker analytics;
 	private Cursor fromCursor;
 	private Cursor toCursor;
@@ -119,7 +119,7 @@ public class Main extends Activity {
         analytics.trackPageView("/");
     }
 
-	private void setFromAdapter() {
+	void setFromAdapter() {
         fromCursor = db.getFrom();
         try {
 	        fromCursor.moveToFirst();
@@ -132,7 +132,7 @@ public class Main extends Activity {
         		fromCursor.getString(fromCursor.getColumnIndex("from_type")));
 	}
 
-	private void setToAdapter() {
+	void setToAdapter() {
         toCursor = db.getTo();
         try {
 	        toCursor.moveToFirst();
@@ -193,14 +193,11 @@ public class Main extends Activity {
     	Intent i = new Intent(this, Result.class);
     	if("".equals(from)) return; // XXX
     	if("".equals(to  )) return; // XXX
-    	i.putExtra("name_origin",      from    .toString());
-    	i.putExtra("type_origin",      fromType.toString());
-    	i.putExtra("name_destination", to    .toString());
-    	i.putExtra("type_destination", toType.toString());
-    	startActivity(i);
-    	db.touch(from, fromType, to, toType);
-    	setFromAdapter();
-    	setToAdapter();
+    	i.putExtra("from",      from.toString());
+    	i.putExtra("from_type", fromType.toString());
+    	i.putExtra("to",        to.toString());
+    	i.putExtra("to_type",   toType.toString());
+    	new JsonDownloader(this, i).execute();
 	}
 
 	@Override public boolean onKeyDown(int keyCode, KeyEvent event)  {
