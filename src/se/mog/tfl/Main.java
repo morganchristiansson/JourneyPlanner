@@ -17,7 +17,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.*;
 import android.widget.AdapterView.OnItemLongClickListener;
 
-public class Planner extends Activity {
+public class Main extends Activity {
 	static final String TAG = "JourneyPlanner";
 //	<select name="type_origin" id="type_origin">
 //    <option value="stop">Station or stop</option>
@@ -52,7 +52,7 @@ public class Planner extends Activity {
 	private Cursor toCursor;
 	@Override public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.planner);
+        setContentView(R.layout.main);
         layoutMain   = (LinearLayout)findViewById(R.id.layout_main);
         activeLayout = layoutMain;
         layoutFrom   = (LinearLayout)findViewById(R.id.layout_from);
@@ -125,7 +125,7 @@ public class Planner extends Activity {
 	        fromCursor.moveToFirst();
 	        setFromFromCursor(fromCursor);
         } catch(CursorIndexOutOfBoundsException e) {}
-        listFrom.setAdapter(new SimpleCursorAdapter(this, R.layout.planner_history_row, fromCursor, new String[] {"from"}, new int[] {R.id.name}));
+        listFrom.setAdapter(new SimpleCursorAdapter(this, R.layout.main_history_row, fromCursor, new String[] {"from"}, new int[] {R.id.name}));
 	}
 	private void setFromFromCursor(Cursor fromCursor) {
         setFrom(fromCursor.getString(fromCursor.getColumnIndex("from")),
@@ -138,7 +138,7 @@ public class Planner extends Activity {
 	        toCursor.moveToFirst();
 	        setToFromCursor(toCursor);
         } catch(CursorIndexOutOfBoundsException e) {}
-        listTo  .setAdapter(new SimpleCursorAdapter(this, R.layout.planner_history_row, toCursor  , new String[] {"to"  }, new int[] {R.id.name}));
+        listTo  .setAdapter(new SimpleCursorAdapter(this, R.layout.main_history_row, toCursor  , new String[] {"to"  }, new int[] {R.id.name}));
 	}
 
 	private void setToFromCursor(Cursor toCursor) {

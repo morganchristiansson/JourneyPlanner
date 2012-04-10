@@ -10,7 +10,7 @@ import android.util.Log;
 public class HistoryDb extends SQLiteOpenHelper {
 	private static final String NAME = "history";
 	private static final int VERSION = 1;
-	private static final String TAG = Planner.TAG;
+	private static final String TAG = Main.TAG;
 
 	public HistoryDb(Context context) {
 		super(context, NAME, null, VERSION);
