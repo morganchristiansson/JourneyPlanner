@@ -69,15 +69,17 @@ public class Main extends Activity {
         db           = new HistoryDb(this);
         setAdapter();
         setFromAdapter();
+        setFromDefault();
         setToAdapter();
+        setToDefault();
         history.setOnItemClickListener(new AdapterView.OnItemClickListener() {
         	@Override public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         		cursor.moveToPosition(position);
-				CharSequence from = fromCursor.getString(fromCursor.getColumnIndex("from"));
-        		CharSequence from_type = fromCursor.getString(fromCursor.getColumnIndex("from_type"));
+				CharSequence from = cursor.getString(cursor.getColumnIndex("from"));
+        		CharSequence from_type = cursor.getString(cursor.getColumnIndex("from_type"));
 				setFrom(from, from_type);
-				CharSequence to = toCursor.getString(toCursor.getColumnIndex("to"));
-				CharSequence to_type = toCursor.getString(toCursor.getColumnIndex("to_type"));
+				CharSequence to = cursor.getString(cursor.getColumnIndex("to"));
+				CharSequence to_type = cursor.getString(cursor.getColumnIndex("to_type"));
 				setTo(to, to_type);
 				search();
         	}
@@ -85,11 +87,11 @@ public class Main extends Activity {
         history.setOnItemLongClickListener(new OnItemLongClickListener() {
 			@Override public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
         		cursor.moveToPosition(position);
-				CharSequence from = fromCursor.getString(fromCursor.getColumnIndex("from"));
-        		CharSequence from_type = fromCursor.getString(fromCursor.getColumnIndex("from_type"));
-				CharSequence to = toCursor.getString(toCursor.getColumnIndex("to"));
-				CharSequence to_type = toCursor.getString(toCursor.getColumnIndex("to_type"));
-				db.clear(from,from_type, to, to_type);
+				CharSequence from = cursor.getString(cursor.getColumnIndex("from"));
+        		CharSequence from_type = cursor.getString(cursor.getColumnIndex("from_type"));
+				CharSequence to = cursor.getString(cursor.getColumnIndex("to"));
+				CharSequence to_type = cursor.getString(cursor.getColumnIndex("to_type"));
+				db.clear(from, from_type, to, to_type);
 				setAdapter();
 				setFromAdapter();
 				setToAdapter();
@@ -155,22 +157,28 @@ public class Main extends Activity {
 	}
 	void setFromAdapter() {
         fromCursor = db.getFrom();
-        try {
-	        fromCursor.moveToFirst();
-	        setFrom(fromCursor.getString(fromCursor.getColumnIndex("from")),
-	        		fromCursor.getString(fromCursor.getColumnIndex("from_type")));
-        } catch(CursorIndexOutOfBoundsException e) {}
         historyFrom.setAdapter(new SimpleCursorAdapter(this, R.layout.main_history_row, fromCursor, new String[] {"from"}, new int[] {R.id.name}));
 	}
 
 	void setToAdapter() {
         toCursor = db.getTo();
+        historyTo  .setAdapter(new SimpleCursorAdapter(this, R.layout.main_history_row, toCursor  , new String[] {"to"  }, new int[] {R.id.name}));
+	}
+
+	private void setFromDefault() {
+        try {
+	        fromCursor.moveToFirst();
+	        setFrom(fromCursor.getString(fromCursor.getColumnIndex("from")),
+	        		fromCursor.getString(fromCursor.getColumnIndex("from_type")));
+        } catch(CursorIndexOutOfBoundsException e) {}
+	}
+
+	private void setToDefault() {
         try {
 	        toCursor.moveToFirst();
 			setTo(toCursor.getString(toCursor.getColumnIndex("to")),
 		          toCursor.getString(toCursor.getColumnIndex("to_type")));
         } catch(CursorIndexOutOfBoundsException e) {}
-        historyTo  .setAdapter(new SimpleCursorAdapter(this, R.layout.main_history_row, toCursor  , new String[] {"to"  }, new int[] {R.id.name}));
 	}
 
 	private TextView.OnEditorActionListener editorActionListener = new TextView.OnEditorActionListener() {
