@@ -10,20 +10,22 @@
 				   a:scaleType="center"
 				   a:padding="20dip"
 				   a:layout_width="fill_parent" a:layout_height="wrap_content"/>
-		<Button a:id="@+id/btn_from" a:hint="From"
-				a:onClick="onClickFrom"
-				a:layout_width="fill_parent" a:layout_height="wrap_content"/>
-		<Button a:id="@+id/reverse" a:text="reverse"
-				a:onClick="onClickReverse"
-				a:layout_gravity="center_horizontal"
-				a:layout_width="wrap_content" a:layout_height="wrap_content"/>
-		<Button a:id="@+id/btn_to" a:hint="To"
-				a:onClick="onClickTo"
-				a:layout_width="fill_parent" a:layout_height="wrap_content"/>
-		<Button a:id="@+id/btn_search" a:text="Search"
-				a:onClick="onClickSearch"
-				a:layout_width="fill_parent" a:layout_height="wrap_content"/>		
-	</LinearLayout>
+		<Button   a:id="@+id/btn_from" a:hint="From"
+				  a:onClick="onClickFrom"
+				  a:layout_width="fill_parent" a:layout_height="wrap_content"/>
+		<Button   a:id="@+id/reverse" a:text="reverse"
+				  a:onClick="onClickReverse"
+				  a:layout_gravity="center_horizontal"
+				  a:layout_width="wrap_content" a:layout_height="wrap_content"/>
+		<Button   a:id="@+id/btn_to" a:hint="To"
+				  a:onClick="onClickTo"
+				  a:layout_width="fill_parent" a:layout_height="wrap_content"/>
+		<Button   a:id="@+id/btn_search" a:text="Search"
+				  a:onClick="onClickSearch"
+				  a:layout_width="fill_parent" a:layout_height="wrap_content"/>
+		<ListView a:id="@+id/history"
+				  a:layout_width="fill_parent" a:layout_height="fill_parent"/>
+		</LinearLayout>
 	<LinearLayout a:id="@+id/layout_from"
 				  a:orientation="vertical"
 				  a:visibility="gone"
@@ -33,7 +35,7 @@
 		<EditText a:id="@+id/text_from"
 				  a:inputType="text" a:imeOptions="actionGo"
 				  a:layout_width="fill_parent" a:layout_height="wrap_content"/>
-		<ListView a:id="@+id/list_from"
+		<ListView a:id="@+id/history_from"
 				  a:layout_width="fill_parent" a:layout_height="fill_parent"/>
 	</LinearLayout>
 	<LinearLayout a:id="@+id/layout_to"
@@ -45,7 +47,7 @@
 		<EditText a:id="@+id/text_to"
 				  a:inputType="text" a:imeOptions="actionGo"
 				  a:layout_width="fill_parent" a:layout_height="wrap_content"/>
-		<ListView a:id="@+id/list_to"
+		<ListView a:id="@+id/history_to"
 				  a:layout_width="fill_parent" a:layout_height="fill_parent"/>
 	</LinearLayout>
 </FrameLayout>

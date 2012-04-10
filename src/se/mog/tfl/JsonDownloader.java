@@ -110,6 +110,7 @@ class JsonDownloader {
 					intent.putExtra("response", response.toString());
 					main.startActivity(intent);
 			    	main.db.touch(from, fromType, to, toType);
+			        main.setAdapter();
 			    	main.setFromAdapter();
 			    	main.setToAdapter();
 				} finally {
