@@ -54,7 +54,7 @@ class JsonDownloader {
 	private String getResponse(String url) throws ClientProtocolException, IOException {
     	//locator = postcode
     	//stop    = station or stop
-		Log.d(Main.TAG, url);
+		//Log.d(Main.TAG, url);
 
 		try {
 			DefaultHttpClient client = new DefaultHttpClient();
@@ -65,7 +65,7 @@ class JsonDownloader {
 			if(s.getStatusCode() != 200) throw new IOException(s.getStatusCode()+" "+s.getReasonPhrase());
 			response.getEntity().writeTo(baos);
 			String responseText = baos.toString();
-			Log.d(Main.TAG, "response="+responseText);
+			//Log.d(Main.TAG, "response="+responseText);
 			return responseText;
 		} finally {
 			request = null;

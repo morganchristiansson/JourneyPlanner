@@ -28,7 +28,7 @@ public class HistoryDb extends SQLiteOpenHelper {
 				     " `created_at` INTEGER," +
 				     " `updated_at` INTEGER" +
 				     ")";
-		Log.d(TAG, sql);
+		//Log.d(TAG, sql);
         db.execSQL(sql);
 	}
 
